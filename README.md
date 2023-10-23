@@ -1,6 +1,4 @@
-# ZJU-blockchain-course-2023
-
-⬆ 可以️修改成你自己的项目名。
+# Car-Lending System
 
 > 第二次作业要求（以下内容提交时可以删除）：
 > 
@@ -35,8 +33,11 @@
     ```bash
     npx hardhat compile
     ```
-4. ...
-5. ...
+4. 在本地开启ganache应用，并设定好RPC server端口号，在`./contracts/hardhat.config.ts`中编写对应network设置
+5. 将合约部署到本地链上：
+    ```bash
+    npx hardhat run ./scripts/deploy.ts --network ganache
+    ```
 6. 在 `./frontend` 中安装需要的依赖，运行如下的命令：
     ```bash
     npm install
@@ -49,8 +50,14 @@
 ## 功能实现分析
 
 简单描述：项目完成了要求的哪些功能？每个功能具体是如何实现的？
+1. 创建一个合约，在合约中发行NFT集合，每个NFT代表一辆汽车
+   
+2. 用户需求： 
+ + 查看自己拥有的汽车列表。查看当前还没有被借用的汽车列表。
++ 查询一辆汽车的主人，以及该汽车当前的借用者（如果有）。
++ 选择并借用某辆还没有被借用的汽车一定时间。
++ 上述过程中借用不需要进行付费。
 
-建议分点列出。
 
 ## 项目运行截图
 
@@ -64,4 +71,8 @@
 
 - ERC-4907 [参考实现](https://eips.ethereum.org/EIPS/eip-4907)
 
-如果有其它参考的内容，也请在这里陈列。
+- ERC-721 [参考实现](https://ethereum.org/zh/developers/docs/standards/tokens/erc-721/)
+
+//Develop guide:
+
+
