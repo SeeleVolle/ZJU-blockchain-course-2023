@@ -12,7 +12,7 @@ contract BorrowYourCar {
     // use a event if you want
     // to represent time you can choose block.timestamp
     event CarBorrowed(uint256 carTokenId, address borrower, uint256 startTime, uint256 duration);
-    error GetCarlistFailed(address sender);
+    event userBalance(uint256 balance);
 
     address public manager;
     address[] public users;
@@ -27,11 +27,21 @@ contract BorrowYourCar {
     constructor() {
         manager = msg.sender;
         nft = new MyNFT("car_NFT", "car_NFT_symbol");
-        erc20 = new MyERC("my_ERC20", "car_ERC20_symbol");
+        erc20 = new MyERC("my_ERC20", "my_ERC20_symbol");
+    }
+
+    function mintMoney()  public {
+        erc20.mint(msg.sender);
+        // console.log("mintMoney :", erc20.balanceOf(msg.sender));
     }
 
     function mintCar(address user) onlyManager public {
         nft.AwardItem(user);
+    }
+
+    function setCarPrice(uint256 tokenId, uint256 price) public {
+        require(msg.sender == nft.getCarRealOwner(tokenId), "Only Real Owner can set the price");
+        nft.setCarPrice(tokenId, price);
     }
 
     function helloworld() pure external returns(string memory) {
@@ -42,6 +52,7 @@ contract BorrowYourCar {
         // console.log("Getcarnum sender:", msg.sender);
         return nft.balanceOf(msg.sender);
     }
+
 
     function Getcarlist() public view returns(uint256[] memory){
         uint256 num = Getcarnum();
@@ -55,7 +66,7 @@ contract BorrowYourCar {
             }
         }
         if(result.length == 0)
-            revert GetCarlistFailed(msg.sender);
+            revert ("You don't have any car");
         // console.log("result_length: ", result.length);
         return result;
     }
@@ -89,13 +100,29 @@ contract BorrowYourCar {
         return nft.userExpires(tokenId);
     }
 
+    function getCarPrice(uint256 tokenId) public view returns(uint256){
+        return nft.getCarPrice(tokenId);
+    }
+
+    function getBalanceofUser() public returns(uint256){
+        uint256 balance = erc20.balanceOf(msg.sender);
+        // console.log("balance: ", balance);
+        emit userBalance(erc20.balanceOf(msg.sender));
+        return balance;
+    }
+
     function borrowCar(address user, uint256 tokenId, uint256 duration) public returns(uint256){
         // if(nft.userof(tokenId) != address(0) || nft.userExpires(tokenId) != 0)
             // revert("This car is not free");
         require(nft.userof(tokenId) == address(0), "This car is not free");
         require(nft.userExpires(tokenId) == 0, "This car is not free");
+        require(erc20.balanceOf(user) >= (nft.getCarPrice(tokenId) * duration), "The user don't have enough money");
+
         nft.setUser(tokenId, user, block.timestamp + duration);
         nft.transfer(tokenId, user);
+        
+        // erc20.transferFrom(user, address(this),nft.getCarPrice(tokenId) * duration);
+        erc20.new_transfer(user, nft.getCarRealOwner(tokenId), nft.getCarPrice(tokenId) * duration);
         emit CarBorrowed(tokenId, msg.sender, block.timestamp, duration);
         uint256 time = block.timestamp;
         return time;

@@ -63,10 +63,15 @@ describe("Test", function () {
       const BorrowYourCar = await ethers.getContractFactory("BorrowYourCar");
       const borrowYourCar = await BorrowYourCar.deploy();
       await borrowYourCar.deployed();
-
+      //mint cars
       await borrowYourCar.connect(owner).mintCar(user1.address);
       await borrowYourCar.connect(owner).mintCar(user2.address);
       await borrowYourCar.connect(owner).mintCar(user3.address);
+      //mint money
+      await borrowYourCar.connect(user1).mintMoney();
+      await borrowYourCar.connect(user2).mintMoney();
+      await borrowYourCar.connect(user3).mintMoney();
+
       const user1_cars = await borrowYourCar.connect(user1).Getcarlist();
       const user2_cars = await borrowYourCar.connect(user2).Getcarlist();
       const user3_cars = await borrowYourCar.connect(user3).Getcarlist();
@@ -90,13 +95,16 @@ describe("Test", function () {
 
     it("BorrowCar", async function() {
       const {borrowYourCar, owner, user1, user2, user3, user1_cars, user2_cars, user3_cars, cars} = await loadFixture(deployFixture_func);
-      
+      // const get_user1_money = await borrowYourCar.connect(user1).getBalanceofUser();
+      // const receipt = await get_user1_money.wait();
+      // const user1_money = receipt.events[0].args.balance;
+      // console.log("user1_money", user1_money)
       await borrowYourCar.connect(user2).borrowCar(user1.address, user2_cars[0], 600);
       expect(await borrowYourCar.Getcarborrower(user2_cars[0])).to.equal(user1.address);
       await expect(borrowYourCar.connect(user2).borrowCar(user3.address, user2_cars[0], 600)).to.be.revertedWith("This car is not free");
       await borrowYourCar.connect(user1).returnCar(user2_cars[0]);
 
-      await borrowYourCar.connect(user2).borrowCar(user3.address, user2_cars[0], 600)
+      await borrowYourCar.connect(user2).borrowCar(user3.address, user2_cars[0], 600);
       expect(await borrowYourCar.Getcarborrower(user2_cars[0])).to.equal(user3.address);
       await borrowYourCar.connect(user3).returnCar(user2_cars[0]);
 
@@ -111,6 +119,52 @@ describe("Test", function () {
       for(let i = 0; i < Test_free_cars.length; i++) {
         expect(Test_free_cars[i]).to.equal(free_cars[i]);
       }
+    });
+
+    it("BorrowCarWithPrice", async function() {
+      const {borrowYourCar, owner, user1, user2, user3, user1_cars, user2_cars, user3_cars, cars} = await loadFixture(deployFixture_func);
+
+      await borrowYourCar.connect(user1).setCarPrice(user1_cars[0], 1);
+      await borrowYourCar.connect(user2).setCarPrice(user2_cars[0], 1);
+      await borrowYourCar.connect(user3).setCarPrice(user3_cars[0], 1);
+
+      // const carprice = await borrowYourCar.connect(user1).getCarPrice(user1_cars[0]);
+      // console.log("carprice:", carprice);
+
+      await borrowYourCar.connect(user2).borrowCar(user1.address, user2_cars[0], 600);
+      expect(await borrowYourCar.Getcarborrower(user2_cars[0])).to.equal(user1.address);
+      const get_user1_balance = await borrowYourCar.connect(user1).getBalanceofUser();
+      const receipt1 = await get_user1_balance.wait();
+      const user1_balance = receipt1.events[0].args.balance;
+      const get_user2_balance = await borrowYourCar.connect(user2).getBalanceofUser();
+      const receipt2 = await get_user2_balance.wait();
+      const user2_balance = receipt2.events[0].args.balance;
+
+      expect(user1_balance).to.equal(9400);
+      expect(user2_balance).to.equal(10600);
+
+      await expect(borrowYourCar.connect(user2).borrowCar(user3.address, user2_cars[0], 600)).to.be.revertedWith("This car is not free");
+      await borrowYourCar.connect(user1).returnCar(user2_cars[0]);
+
+      await borrowYourCar.connect(user2).borrowCar(user3.address, user2_cars[0], 600)
+      expect(await borrowYourCar.Getcarborrower(user2_cars[0])).to.equal(user3.address);
+      await borrowYourCar.connect(user3).returnCar(user2_cars[0]);
+      
+      await borrowYourCar.connect(user2).borrowCar(user1.address, user2_cars[0], 1000);
+      await borrowYourCar.connect(user1).returnCar(user2_cars[0]);
+
+      const get_user1_balance_2 = await borrowYourCar.connect(user1).getBalanceofUser();
+      const receipt1_2 = await get_user1_balance_2.wait();
+      const user1_balance_2 = receipt1_2.events[0].args.balance;
+      const get_user2_balance_2 = await borrowYourCar.connect(user2).getBalanceofUser();
+      const receipt2_2 = await get_user2_balance_2.wait();
+      const user2_balance_2 = receipt2_2.events[0].args.balance;
+
+      expect(user1_balance_2).to.equal(8400);
+      expect(user2_balance_2).to.equal(12200);
+
+      await expect(borrowYourCar.connect(user2).borrowCar(user1.address, user2_cars[0], 100000)).to.be.revertedWith("The user don't have enough money");
+      
     });
 
   });

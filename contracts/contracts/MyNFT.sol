@@ -17,6 +17,7 @@ contract MyNFT is ERC721 {
         address owner;
         address user;
         uint256 expires;
+        uint256 pricepersecond;
     }
     
     constructor(string memory name, string memory symbol) ERC721(name, symbol){
@@ -39,6 +40,7 @@ contract MyNFT is ERC721 {
         info.owner = user;
         info.user = address(0);
         info.expires = 0;
+        info.pricepersecond = 0;
     }
 
     //Set the user and expires of an NFT
@@ -49,6 +51,14 @@ contract MyNFT is ERC721 {
         emit UpdateUser(tokenId, user, expires);
     }
 
+    function setCarPrice(uint256 tokenId, uint256 price) public {
+        CarInfo storage info = Cars[tokenId];
+        info.pricepersecond = price;
+    }
+
+    function getCarPrice(uint256 tokenId) public view returns(uint256){
+        return Cars[tokenId].pricepersecond;
+    }
 
     function getCarRealOwner(uint256 tokenId) public view returns(address){
         return Cars[tokenId].owner;
