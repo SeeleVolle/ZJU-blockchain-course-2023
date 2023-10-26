@@ -12,7 +12,8 @@ contract MyERC is ERC20{
 
     }
 
-    function mint(address user) external{
+    function mint() external{
+        address user = msg.sender;
         require(claimedUserList[user] == false, "You have already claimed");
         _mint(user, 10000);
         // console.log("msg.sender:", msg.sender);

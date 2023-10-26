@@ -25,13 +25,15 @@ describe("Test", function () {
   describe("Minting", function () {
     it("Should mint", async function () {
       const {borrowYourCar, owner, user1, user2, user3} = await loadFixture(deployFixture);
-      await borrowYourCar.connect(owner).mintCar(user1.address);
-      await borrowYourCar.connect(owner).mintCar(user1.address);
-      await borrowYourCar.connect(owner).mintCar(user1.address);
-      await borrowYourCar.connect(owner).mintCar(user2.address);
-      await borrowYourCar.connect(owner).mintCar(user1.address);
-      await borrowYourCar.connect(owner).mintCar(user2.address);
-      await borrowYourCar.connect(owner).mintCar(user3.address);
+      await borrowYourCar.connect(user1).mintCar();
+      await borrowYourCar.connect(user1).mintCar();
+      await borrowYourCar.connect(user1).mintCar();
+      await borrowYourCar.connect(user2).mintCar();
+      await borrowYourCar.connect(user1).mintCar();
+      await borrowYourCar.connect(user2).mintCar();
+      await borrowYourCar.connect(user3).mintCar();
+      await borrowYourCar.connect(user2).mintCar();
+      // console.log(user2.address)
       const user1_cars = await borrowYourCar.connect(user1).Getcarlist();
       const user2_cars = await borrowYourCar.connect(user2).Getcarlist();
       const user3_cars = await borrowYourCar.connect(user3).Getcarlist();
@@ -50,7 +52,7 @@ describe("Test", function () {
       // expect(await borrowYourCar.connect(user1).Getcarborrowerexpires(user2_cars[0])).to.equal();
       // expect(await borrowYourCar.connect(user1).Getcarlist()).to.equal(car_1);
       expect(await borrowYourCar.connect(user1).Getcarnum()).to.equal(4);
-      expect(await borrowYourCar.connect(user2).Getcarnum()).to.equal(2);
+      expect(await borrowYourCar.connect(user2).Getcarnum()).to.equal(3);
       expect(await borrowYourCar.connect(user3).Getcarnum()).to.equal(1);
     });
   });
@@ -64,9 +66,9 @@ describe("Test", function () {
       const borrowYourCar = await BorrowYourCar.deploy();
       await borrowYourCar.deployed();
       //mint cars
-      await borrowYourCar.connect(owner).mintCar(user1.address);
-      await borrowYourCar.connect(owner).mintCar(user2.address);
-      await borrowYourCar.connect(owner).mintCar(user3.address);
+      await borrowYourCar.connect(user1).mintCar();
+      await borrowYourCar.connect(user2).mintCar();
+      await borrowYourCar.connect(user3).mintCar();
       //mint money
       await borrowYourCar.connect(user1).mintMoney();
       await borrowYourCar.connect(user2).mintMoney();

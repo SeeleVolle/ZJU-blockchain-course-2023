@@ -30,15 +30,14 @@ contract BorrowYourCar {
         erc20 = new MyERC("my_ERC20", "my_ERC20_symbol");
     }
 
-    function mintMoney()  public {
-        erc20.mint(msg.sender);
-        // console.log("mintMoney :", erc20.balanceOf(msg.sender));
-    }
+    // function mintMoney()  public {
+    //     erc20.mint(msg.sender);
+    //     // console.log("mintMoney :", erc20.balanceOf(msg.sender));
+    // }
 
-    function mintCar(address user) onlyManager public {
-        nft.AwardItem(user);
-    }
-
+    // function mintCar() public {
+    //     nft.AwardItem(msg.sender);
+    // }
     function setCarPrice(uint256 tokenId, uint256 price) public {
         require(msg.sender == nft.getCarRealOwner(tokenId), "Only Real Owner can set the price");
         nft.setCarPrice(tokenId, price);
@@ -60,7 +59,7 @@ contract BorrowYourCar {
         uint256[] memory result = new uint256[](num);
         uint256 counter = 0;
         for(uint256 i = 0; i < carlist.length; i++){
-            if(nft.userof(carlist[i]) == msg.sender || nft.ownerOf(carlist[i]) == msg.sender){
+            if(nft.ownerOf(carlist[i]) == msg.sender || nft.userof(carlist[i]) == msg.sender){
                 result[counter] = carlist[i];
                 counter++;
             }
@@ -118,7 +117,7 @@ contract BorrowYourCar {
         require(nft.userExpires(tokenId) == 0, "This car is not free");
         require(erc20.balanceOf(user) >= (nft.getCarPrice(tokenId) * duration), "The user don't have enough money");
 
-        nft.setUser(tokenId, user, block.timestamp + duration);
+        nft.setUser(tokenId, user, duration);
         nft.transfer(tokenId, user);
         
         // erc20.transferFrom(user, address(this),nft.getCarPrice(tokenId) * duration);

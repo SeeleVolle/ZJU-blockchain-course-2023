@@ -30,24 +30,27 @@ contract MyNFT is ERC721 {
         address owner = ownerOf(tokenId);
         return (caller == owner || getApproved(tokenId) == caller || isApprovedForAll(owner, caller));
     }
-
-    // Mint a new NFT to the user
-    function AwardItem(address user) public virtual{
+    
+    function AddItem() public virtual{
+        require(msg.sender != address(0), "ERC721: mint to the zero address");
         _tokenIds += 1;
-        uint256 newItemId = _tokenIds;
-        _mint(user, newItemId);
-        CarInfo storage info = Cars[newItemId];
-        info.owner = user;
+         CarInfo storage info = Cars[_tokenIds];
+        info.owner = msg.sender;
         info.user = address(0);
         info.expires = 0;
         info.pricepersecond = 0;
+    }
+
+    // Mint a new NFT to the user
+    function AwardItem() public virtual{
+        _mint(msg.sender, _tokenIds);
     }
 
     //Set the user and expires of an NFT
     function setUser(uint256 tokenId, address user, uint256 expires) public {
         CarInfo storage info = Cars[tokenId];
         info.user = user;
-        info.expires = expires;
+        info.expires = expires + block.timestamp;
         emit UpdateUser(tokenId, user, expires);
     }
 
@@ -109,6 +112,15 @@ contract MyNFT is ERC721 {
         _transfer(super.ownerOf(tokenID), user, tokenID);
     }
 
+    function Checkexpired() public{
+        for(uint256 i = 1; i <= _tokenIds; i++){
+            if(Cars[i].expires <= block.timestamp){
+                Cars[i].user = address(0);
+                Cars[i].expires = 0;
+                emit UpdateUser(i, address(0), 0);
+            }
+        }
+    }
 
     function helloworld() pure external returns(string memory) {
         return "hello world";
